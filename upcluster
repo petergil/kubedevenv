@@ -60,8 +60,9 @@ nodes:
   #       containerPath: /local
 EOF
 
-echo "\n### Setting up additional services\n"
-
+echo
+echo "### Setting up additional services"
+echo
 # create registry container unless it already exists
 if [ "$("${docker_binary}" inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
   "${docker_binary}" run --net=kind \
@@ -82,6 +83,7 @@ helm_apply observability loki       grafana/loki
 helm_apply observability promtail   grafana/promtail
 helm_apply observability grafana    grafana/grafana
 
+echo "Starting minio setup (this takes a while)"
 helm_apply minio minio minio/minio
 
 cat <<EOF
