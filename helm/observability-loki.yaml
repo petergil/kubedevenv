@@ -1,0 +1,22 @@
+# podAnnotations:
+#   prometheus.io/scrape: "true"
+#   prometheus.io/path: /metrics
+#   prometheus.io/port: "3100"
+persistence:
+  enabled: true
+
+config:
+# Needed for Alerting: https://grafana.com/docs/loki/latest/rules/
+# This is just a simple example, for more details:
+# https://grafana.com/docs/loki/latest/configuration/#ruler_config
+ ruler:
+   storage:
+     type: local
+     local:
+       directory: /data/loki/rules
+   rule_path: /tmp/scratch
+   alertmanager_url: http://prometheus-alertmanager
+   ring:
+     kvstore:
+       store: inmemory
+   enable_api: true

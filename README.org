@@ -1,0 +1,70 @@
+
+#+TITLE: An opinionated setup for local app development in kubernetes
+
+This repository provides a setup to run a local kubernetes in [[https://kind.sigs.k8s.io/][kind]]
+with
+
+- [[https://grafana.com/grafana/][grafana]] :: dashboard and log visualization
+- [[https://grafana.com/oss/loki/][loki]] :: log store
+- [[https://prometheus.io/][prometheus]] :: metrics
+- [[https://grafana.com/oss/tempo/][tempo]] :: traces
+- [[https://min.io/][minio]] :: s3 backend
+
+running inside the cluster, as well as
+
+- a local (to the host) directory path is available and mounted inside of the cluster
+- a private docker registry that is available both on the host and inside of the cluster
+
+The setup can be run using rootless ~podman~ (in fact that's how it's developed). See the
+~local-settings.sh~ file for more information regarding that.
+
+To get started it might be possible to just clone the repo and run the ~upcluster~ command,
+but read the following section for more details.
+
+* Running
+** Requirements / preparation
+
+To be able to set up the cluster the following tools need to be
+installed and in the path
+
+- ~kubectl~ :: https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+- ~kind~ :: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+- ~helm~ :: https://helm.sh/docs/intro/install/
+- a container runtime that's supported by kind :: by default [[https://www.docker.com/][docker]] is
+  used but [[https://docs.podman.io/en/latest/][podman]] is also possible, see the comments in ~local-settings.sh~
+
+Additionally the following ~helm~ repositories need to be installed
+
+#+begin_src bash
+  helm repo add grafana https://grafana.github.io/helm-charts
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo add minio https://charts.min.io
+  helm repo update
+#+end_src
+
+** Creating the cluster
+
+Once the requirements are met it's possible to create a cluster by running
+
+#+begin_src bash
+./upcluster
+#+end_src
+
+in the cloned repository. Once the cluster has been set up a message will be
+printed with some information about the running services.
+
+Note that it may take some time for the required container images to be pulled
+to the local host, and that sometimes the docker registry might rate-limit
+requests. In these cases provisioning will take a few minutes longer.
+
+** Stopping and starting the cluster
+
+To stop the running cluster, run
+#+begin_src bash
+  ./stopcluster
+#+end_src
+
+To restart a stopped cluster, run
+#+begin_src bash
+  ./startcluster
+#+end_src

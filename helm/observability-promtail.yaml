@@ -1,0 +1,6 @@
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: /metrics
+  prometheus.io/port: "3101"
+config:
+  lokiAddress: "http://loki:3100/loki/api/v1/push"

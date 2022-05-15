@@ -1,0 +1,13 @@
+mode: standalone
+
+persistence:
+  size: 20Gi
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: /minio/v2/metrics/cluster
+  prometheus.io/port: "9000"
+
+resources:
+  requests:
+    memory: 1Gi

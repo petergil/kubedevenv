@@ -1,0 +1,113 @@
+#!/bin/bash
+
+set -o errexit
+
+SCRIPTDIR="$(dirname "$(readlink -f "${0}")")"
+cd "${SCRIPTDIR}"
+
+source local-settings.sh
+
+docker_binary="${KIND_EXPERIMENTAL_PROVIDER:-docker}"
+local_storage="${KIND_LOCAL_STORAGE:-"${SCRIPTDIR}/local-storage"}"
+
+reg_name='kind-registry'
+reg_port='5000'
+
+# create a cluster with a local registry enabled in containerd and a
+# local path mounted onto the node
+cat <<EOF | kind create cluster --config=-
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
+    endpoint = ["http://${reg_name}:5000"]
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: "${local_storage}"
+        containerPath: /local
+    #kubeadmConfigPatches:
+    # - |
+    #   kind: InitConfiguration
+    #   nodeRegistration:
+    #     kubeletExtraArgs:
+    #       node-labels: "ingress-ready=true"
+    # extraPortMappings:
+    # - containerPort: 80
+    #   hostPort: 80
+    #   protocol: TCP
+    #   listenAddress: "127.0.0.1"
+    # - containerPort: 443
+    #   hostPort: 443
+    #   protocol: TCP
+    #   listenAddress: "127.0.0.1"
+    # - containerPort: 3000
+    #   hostPort: 3000
+    #   protocol: TCP
+    #   listenAddress: "127.0.0.1"
+  # - role: worker
+  #   extraMounts:
+  #     - hostPath: "${local_storage}"
+  #       containerPath: /local
+  # - role: worker
+  #   extraMounts:
+  #     - hostPath: "${local_storage}"
+  #       containerPath: /local
+  # - role: worker
+  #   extraMounts:
+  #     - hostPath: "${local_storage}"
+  #       containerPath: /local
+EOF
+
+echo "\n### Setting up additional services\n"
+
+# create registry container unless it already exists
+if [ "$("${docker_binary}" inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
+  "${docker_binary}" run --net=kind \
+    -d --restart=always -p "127.0.0.1:${reg_port}:5000" --name "${reg_name}" \
+    registry:2
+fi
+kubectl apply -R -f manifests/local-registry.yaml
+
+helm_apply () {
+    helm upgrade --install --create-namespace --namespace "${1}" -f "helm/${1}-${2}.yaml" "${2}" "${3}" >/dev/null \
+        && echo " ✓ Successfully applied ${2}" \
+        || echo " 😱 Failed applying ${2}"
+}
+
+helm_apply observability prometheus prometheus-community/prometheus
+helm_apply observability tempo      grafana/tempo
+helm_apply observability loki       grafana/loki
+helm_apply observability promtail   grafana/promtail
+helm_apply observability grafana    grafana/grafana
+
+helm_apply minio minio minio/minio
+
+cat <<EOF
+
+####################
+
+Succesfully finished cluster setup.
+
+* The host path '${local_storage}' is exported to the path '/local' on the kubernetes node and can be mounted inside kubernetes pods
+
+* To access your grafana interface you need to run the command
+    kubectl --namespace observability port-forward service/grafana 3000
+  and then log in with
+
+  Host: localhost:3000
+  User: admin
+  Password: $(kubectl get secret --namespace observability grafana -o jsonpath="{.data.admin-password}" | base64 --decode)
+
+* To access the minio console you need to run the command
+    kubectl port-forward --namespace minio service/minio-console 9001
+  and then log in with
+
+    Host: localhost:9001
+    User: console
+    Password: console123
+
+* A local container registry is running at 'http://localhost:5000' that is also available inside of the cluster
+
+EOF

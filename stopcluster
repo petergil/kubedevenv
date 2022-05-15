@@ -1,0 +1,13 @@
+#!/bin/bash
+
+SCRIPTDIR="$(dirname "$(readlink -f "${0}")")"
+cd "${SCRIPTDIR}"
+
+source local-settings.sh
+
+docker_binary="${KIND_EXPERIMENTAL_PROVIDER:-docker}"
+
+echo "Attempting to stop cluster"
+
+"${docker_binary}" stop kind-control-plane
+"${docker_binary}" stop kind-registry
