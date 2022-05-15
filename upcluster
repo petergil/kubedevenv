@@ -71,6 +71,7 @@ if [ "$("${docker_binary}" inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/
 fi
 kubectl apply -R -f manifests/local-registry.yaml
 
+# $1=<namespace> $2=<deployment-name> $3=<chart repo / chart name>
 helm_apply () {
     helm upgrade --install --create-namespace --namespace "${1}" -f "helm/${1}-${2}.yaml" "${2}" "${3}" >/dev/null \
         && echo " ✓ Successfully applied ${2}" \
