@@ -75,7 +75,7 @@ kubectl apply -R -f manifests/local-registry.yaml
 helm_apply () {
     helm upgrade --install --create-namespace --namespace "${1}" -f "helm/${1}-${2}.yaml" "${2}" "${3}" >/dev/null \
         && echo " ✓ Successfully applied ${2}" \
-        || echo " 😱 Failed applying ${2}"
+        || (echo " 😱 Failed applying ${2}"; return 1)
 }
 
 helm_apply observability prometheus prometheus-community/prometheus
