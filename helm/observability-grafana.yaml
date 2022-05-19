@@ -15,7 +15,7 @@ datasources:
         maxLines: 5000
         derivedFields:
         - datasourceUid: tempo
-          matcherRegex: "traceID=(\\w+)"
+          matcherRegex: "[Tt]race_?[Ii][Dd]=(\\w+)"
           name: TraceID
           # url will be interpreted as query for the datasource
           url: '$${__value.raw}'
