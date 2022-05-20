@@ -23,8 +23,8 @@ but read the following section for more details.
 
 *NOTE* Currently these scripts don't support restarting the cluster. To deal
 with reboots etc you need to delete and then recreate the cluster. If you do
-this ALL data in the cluster (except for the data in the shared directory)
-will be deleted.
+this ALL data in the cluster (except for the data in the shared directory and
+in the docker registry) will be deleted.
 
 This is not seen as a critical issue since all operations should either be
 backed up in deployment files or (in the worst case) synced up in the
