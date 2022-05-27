@@ -1,4 +1,8 @@
+
 mode: standalone
+
+environment:
+  MINIO_PROMETHEUS_URL: "http://prometheus-server.observability.svc.cluster.local/"
 
 persistence:
   size: 20Gi
