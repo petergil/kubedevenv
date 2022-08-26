@@ -83,6 +83,7 @@ helm_apply observability tempo      grafana/tempo
 helm_apply observability loki       grafana/loki
 helm_apply observability promtail   grafana/promtail
 helm_apply observability grafana    grafana/grafana
+helm_apply timescale timescale timescale/timescaledb-single
 
 echo "Starting minio setup (this takes a while)"
 helm_apply minio minio minio/minio
@@ -110,6 +111,12 @@ Succesfully finished cluster setup.
     Host: localhost:9001
     User: console
     Password: console123
+
+* To access the running timescale database you can use the info
+
+    Service: timescale.timescale.svc.cluster.local postgres
+    User: admin
+    Password: $(kubectl get secret  timescale-credentials -o jsonpath="{.data.PATRONI_admin_PASSWORD}" | base64 --decode)
 
 * A local container registry is running at 'http://localhost:5000' that is also available inside of the cluster
 
