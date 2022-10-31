@@ -5,11 +5,11 @@
 persistence:
   enabled: true
 
-config:
+loki:
 # Needed for Alerting: https://grafana.com/docs/loki/latest/rules/
 # This is just a simple example, for more details:
 # https://grafana.com/docs/loki/latest/configuration/#ruler_config
- ruler:
+ rulerConfig:
    storage:
      type: local
      local:
