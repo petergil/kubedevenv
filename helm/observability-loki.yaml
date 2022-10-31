@@ -6,17 +6,30 @@ persistence:
   enabled: true
 
 loki:
-# Needed for Alerting: https://grafana.com/docs/loki/latest/rules/
-# This is just a simple example, for more details:
-# https://grafana.com/docs/loki/latest/configuration/#ruler_config
- rulerConfig:
-   storage:
-     type: local
-     local:
-       directory: /data/loki/rules
-   rule_path: /tmp/scratch
-   alertmanager_url: http://prometheus-alertmanager
-   ring:
-     kvstore:
-       store: inmemory
-   enable_api: true
+  storage:
+    type: filesystem
+    filesystem:
+      chunks_directory: /var/loki/chunks
+      rules_directory: /var/loki/rules
+  rulerConfig:
+    storage:
+      type: local
+      local:
+        directory: /var/loki/rules
+    rule_path: /tmp/scratch
+    alertmanager_url: http://prometheus-alertmanager
+    ring:
+      kvstore:
+        store: inmemory
+    enable_api: true
+monitoring:
+  selfMonitoring:
+    enabled: false
+    lokiCanary:
+      enabled: false
+singleBinary:
+  replicas: 3
+  affinity: |
+    podAntiAffinity:
+test:
+  enabled: false

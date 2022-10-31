@@ -11,6 +11,7 @@ datasources:
       version: 1
       isDefault: true
       jsonData:
+        httpHeaderName1: X-Scope-OrgID
         manageAlerts: true
         maxLines: 5000
         derivedFields:
@@ -19,6 +20,8 @@ datasources:
           name: TraceID
           # url will be interpreted as query for the datasource
           url: '$${__value.raw}'
+      secureJsonData:
+        httpHeaderValue1: default
     - name: prometheus
       type: prometheus
       uid: prometheus
@@ -59,8 +62,8 @@ datasources:
           datasourceUid: loki
 service:
   port: 3000
-  # type: NodePort
-  # nodePort: 3000
+  type: NodePort
+  nodePort: 30000
 persistence:
   enabled: true
 podAnnotations:
