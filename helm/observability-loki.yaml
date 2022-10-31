@@ -5,31 +5,22 @@
 persistence:
   enabled: true
 
-loki:
-  storage:
-    type: filesystem
-    filesystem:
-      chunks_directory: /var/loki/chunks
-      rules_directory: /var/loki/rules
-  rulerConfig:
-    storage:
-      type: local
-      local:
-        directory: /var/loki/rules
-    rule_path: /tmp/scratch
-    alertmanager_url: http://prometheus-alertmanager
-    ring:
-      kvstore:
-        store: inmemory
-    enable_api: true
 monitoring:
+  dashboards:
+    enabled: true
+    namespace: observability
   selfMonitoring:
     enabled: false
     lokiCanary:
       enabled: false
-singleBinary:
-  replicas: 3
+write:
   affinity: |
     podAntiAffinity:
+read:
+  affinity: |
+    podAntiAffinity:
+
 test:
   enabled: false
+minio:
+  enabled: true
