@@ -9,6 +9,7 @@ source local-settings.sh
 
 docker_binary="${KIND_EXPERIMENTAL_PROVIDER:-docker}"
 local_storage="${KIND_LOCAL_STORAGE:-"${SCRIPTDIR}/local-storage"}"
+local_code="${KIND_LOCAL_CODE:-"${SCRIPTDIR}/local-code"}"
 
 reg_name='kind-registry'
 reg_port='5000'
@@ -26,13 +27,16 @@ nodes:
   - role: control-plane
     extraMounts:
       - hostPath: "${local_storage}"
-        containerPath: /local
-    #kubeadmConfigPatches:
-    # - |
-    #   kind: InitConfiguration
-    #   nodeRegistration:
-    #     kubeletExtraArgs:
-    #       node-labels: "ingress-ready=true"
+        containerPath: /local/persistent
+      - hostPath: "${local_code}"
+        containerPath: /local/code
+        readOnly: true
+    kubeadmConfigPatches:
+    - |
+      kind: InitConfiguration
+      nodeRegistration:
+        kubeletExtraArgs:
+          node-labels: "ingress-ready=true"
     # extraPortMappings:
     # - containerPort: 80
     #   hostPort: 80
@@ -94,7 +98,9 @@ cat <<EOF
 
 Succesfully finished cluster setup.
 
-* The host path '${local_storage}' is exported to the path '/local' on the kubernetes node and can be mounted inside kubernetes pods
+* The host path '${local_storage}' is exported to the path '/local/persistent' on the kubernetes node and can be mounted inside kubernetes pods
+
+* The host path '${local_code}' is exported readonly to the path '/local/code' on the kubernetes node and can be mounted inside kubernetes pods
 
 * To access your grafana interface you need to run the command
     kubectl --namespace observability port-forward service/grafana 3000

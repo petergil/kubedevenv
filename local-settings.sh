@@ -8,3 +8,7 @@
 ## Uncomment this line and set it to a value if you want to mount a
 ## different directory on the host inside of the cluster
 #KIND_LOCAL_STORAGE=
+
+## Uncomment this line and set it to a value if you want to mount a
+## different directory on the host inside of the cluster
+#KIND_LOCAL_CODE=
